@@ -1,10 +1,8 @@
 package com.github.zjor.config;
 
 import com.github.zjor.repository.MongoRepository;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,11 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class MongoConfiguration {
 
     @Bean
-    public MongoClient mongoClient() {
-        ServerAddress address = new ServerAddress("localhost", 27017);
-        MongoCredential creds = MongoCredential.createCredential("storage", "storage", "s3cr3t".toCharArray());
-
-        return new MongoClient(address, creds, MongoClientOptions.builder().build());
+    public MongoClient mongoClient(@Value("${mongo.uri}") String mongoUri) {
+        return new MongoClient(new MongoClientURI(mongoUri));
     }
 
     @Bean
