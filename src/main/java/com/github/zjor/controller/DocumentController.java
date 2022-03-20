@@ -1,9 +1,12 @@
 package com.github.zjor.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zjor.repository.MongoRepository;
 import com.github.zjor.util.DocumentUtils;
+import com.github.zjor.util.JacksonJqService;
 import org.bson.Document;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,9 +21,15 @@ import java.util.regex.Pattern;
 public class DocumentController {
 
     private final MongoRepository repository;
+    private final JacksonJqService jqService;
+    private final ObjectMapper objectMapper;
 
-    public DocumentController(MongoRepository mongoRepository) {
+    public DocumentController(MongoRepository mongoRepository,
+                              JacksonJqService jqService,
+                              ObjectMapper objectMapper) {
         this.repository = mongoRepository;
+        this.jqService = jqService;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping
@@ -38,23 +47,33 @@ public class DocumentController {
     }
 
     @GetMapping("id/{id}")
-    public Document getById(
+    public Object getById(
             @PathVariable("collectionName") String collectionName,
-            @PathVariable("id") String id
+            @PathVariable("id") String id,
+            @RequestParam(value = "q", required = false) String jq
     ) {
         //TODO: prefix collection name with tenant
-        return repository.findById(collectionName, id)
+        var doc = repository.findById(collectionName, id)
                 .orElseThrow(() -> new NotFoundException(collectionName + ":" + id));
+        if (StringUtils.hasText(jq)) {
+            try {
+                return jqService.jq(objectMapper.writeValueAsString(doc), jq);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return doc;
     }
 
-    @GetMapping("id/{id}/p/**")
+    @GetMapping("id/{id}/**")
     public Object getDocumentPart(
             @PathVariable("collectionName") String collectionName,
             @PathVariable("id") String id,
             HttpServletRequest req) {
-        Pattern regex = Pattern.compile(id + "/p/" + "(.+)");
+        Pattern regex = Pattern.compile(id + "/" + "(.+)");
         Matcher m = regex.matcher(req.getRequestURI());
         if (m.find()) {
+            //TODO: prefix collection name with tenant
             Document document = repository.findById(collectionName, id)
                     .orElseThrow(() -> new NotFoundException(collectionName + ":" + id));
             return DocumentUtils.getDocumentPart(document, m.group(1));
@@ -62,5 +81,4 @@ public class DocumentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
-
 }
