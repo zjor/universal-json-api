@@ -31,7 +31,7 @@ public class JacksonJqService {
             } else {
                 return objectMapper.createArrayNode().addAll(out);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
