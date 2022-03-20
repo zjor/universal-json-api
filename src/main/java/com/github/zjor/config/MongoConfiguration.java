@@ -1,6 +1,6 @@
 package com.github.zjor.config;
 
-import com.github.zjor.MongoRepository;
+import com.github.zjor.repository.MongoRepository;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;

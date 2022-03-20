@@ -1,6 +1,6 @@
 package com.github.zjor.controller;
 
-import com.github.zjor.MongoRepository;
+import com.github.zjor.repository.MongoRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

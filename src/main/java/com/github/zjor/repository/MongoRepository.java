@@ -1,4 +1,4 @@
-package com.github.zjor;
+package com.github.zjor.repository;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
