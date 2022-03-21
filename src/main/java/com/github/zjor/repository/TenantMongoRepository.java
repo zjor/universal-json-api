@@ -34,6 +34,10 @@ public class TenantMongoRepository {
         return repository.findById(getCollectionName(tenant, collectionName), id);
     }
 
+    public Document deleteDocument(String tenant, String collectionName, String id) {
+        return repository.deleteDocument(getCollectionName(tenant, collectionName), id);
+    }
+
     private String getCollectionName(String tenant, String collectionName) {
         return tenant + "-" + collectionName;
     }

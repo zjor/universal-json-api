@@ -67,6 +67,14 @@ public class DocumentController {
         return jq(doc, jq);
     }
 
+    @DeleteMapping("id/{id}")
+    public Object deleteDocument(
+            @PathVariable("collectionName") String collectionName,
+            @PathVariable("id") String id,
+            @Tenant String tenant) {
+        return repository.deleteDocument(tenant, collectionName, id);
+    }
+
     @GetMapping("id/{id}/**")
     public Object getDocumentPart(
             @PathVariable("collectionName") String collectionName,

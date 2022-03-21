@@ -48,4 +48,10 @@ public class MongoRepository {
         var q = new Document("_id", new ObjectId(id));
         return Optional.ofNullable(getDb().getCollection(collectionName).find(q).first());
     }
+
+    public Document deleteDocument(String collectionName, String id) {
+        var q = new Document("_id", new ObjectId(id));
+        return getDb().getCollection(collectionName).findOneAndDelete(q);
+    }
+
 }
