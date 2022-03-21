@@ -1,7 +1,8 @@
 package com.github.zjor.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zjor.repository.MongoRepository;
+import com.github.zjor.ext.spring.Tenant;
+import com.github.zjor.repository.TenantMongoRepository;
 import com.github.zjor.util.DocumentUtils;
 import com.github.zjor.util.JacksonJqService;
 import org.bson.Document;
@@ -20,65 +21,72 @@ import java.util.regex.Pattern;
 @RequestMapping("api/v1.0/c/{collectionName}")
 public class DocumentController {
 
-    private final MongoRepository repository;
+    private final TenantMongoRepository repository;
     private final JacksonJqService jqService;
     private final ObjectMapper objectMapper;
 
-    public DocumentController(MongoRepository mongoRepository,
+    public DocumentController(TenantMongoRepository repository,
                               JacksonJqService jqService,
                               ObjectMapper objectMapper) {
-        this.repository = mongoRepository;
+        this.repository = repository;
         this.jqService = jqService;
         this.objectMapper = objectMapper;
     }
 
     @GetMapping
-    public List<Object> listCollection(@PathVariable("collectionName") String collectionName) {
-        //TODO: prefix collection name with tenant
-        return repository.listCollection(collectionName);
+    public List<Object> listCollection(
+            @PathVariable("collectionName") String collectionName,
+            @Tenant String tenant) {
+        return repository.listCollection(tenant, collectionName);
     }
 
     @PostMapping
     public Document createDocument(
             @PathVariable("collectionName") String collectionName,
-            @RequestBody Map<String, Object> req) {
-        //TODO: prefix collection name with tenant
-        return repository.save(collectionName, req);
+            @RequestBody Map<String, Object> req,
+            @Tenant String tenant) {
+        return repository.save(tenant, collectionName, req);
     }
 
     @GetMapping("id/{id}")
     public Object getById(
             @PathVariable("collectionName") String collectionName,
             @PathVariable("id") String id,
-            @RequestParam(value = "q", required = false) String jq
+            @RequestParam(value = "jq", required = false) String jq,
+            @Tenant String tenant
     ) {
-        //TODO: prefix collection name with tenant
-        var doc = repository.findById(collectionName, id)
+        var doc = repository.findById(tenant, collectionName, id)
                 .orElseThrow(() -> new NotFoundException(collectionName + ":" + id));
-        if (StringUtils.hasText(jq)) {
-            try {
-                return jqService.jq(objectMapper.writeValueAsString(doc), jq);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return doc;
+        return jq(doc, jq);
     }
 
     @GetMapping("id/{id}/**")
     public Object getDocumentPart(
             @PathVariable("collectionName") String collectionName,
             @PathVariable("id") String id,
-            HttpServletRequest req) {
+            @RequestParam(value = "jq", required = false) String jq,
+            HttpServletRequest req,
+            @Tenant String tenant) {
         Pattern regex = Pattern.compile(id + "/" + "(.+)");
         Matcher m = regex.matcher(req.getRequestURI());
         if (m.find()) {
-            //TODO: prefix collection name with tenant
-            Document document = repository.findById(collectionName, id)
+            Document document = repository.findById(tenant, collectionName, id)
                     .orElseThrow(() -> new NotFoundException(collectionName + ":" + id));
-            return DocumentUtils.getDocumentPart(document, m.group(1));
+            return jq(DocumentUtils.getDocumentPart(document, m.group(1)), jq);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private Object jq(Object json, String query) {
+        if (StringUtils.hasText(query)) {
+            try {
+                return jqService.jq(objectMapper.writeValueAsString(json), query);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            return json;
         }
     }
 }

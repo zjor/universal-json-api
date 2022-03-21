@@ -1,6 +1,7 @@
 package com.github.zjor.controller;
 
-import com.github.zjor.repository.MongoRepository;
+import com.github.zjor.ext.spring.Tenant;
+import com.github.zjor.repository.TenantMongoRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,17 +12,15 @@ import java.util.List;
 @RequestMapping("api/v1.0/c")
 public class CollectionController {
 
-    private final MongoRepository mongoRepository;
+    private final TenantMongoRepository repository;
 
-    public CollectionController(MongoRepository mongoRepository) {
-        this.mongoRepository = mongoRepository;
+    public CollectionController(TenantMongoRepository repository) {
+        this.repository = repository;
     }
 
     @GetMapping
-    public List<String> listCollectionNames() {
-        //TODO: filter collection names by <tenant>-*
-        //TODO: resolve tenant by annotation
-        return mongoRepository.getCollectionNames("");
+    public List<String> listCollectionNames(@Tenant String tenant) {
+        return repository.getCollectionNames(tenant);
     }
 
 }

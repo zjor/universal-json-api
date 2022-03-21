@@ -25,6 +25,7 @@ public class MongoRepository {
     public List<String> getCollectionNames(String prefix) {
         return StreamSupport.stream(getDb().listCollectionNames().spliterator(), false)
                 .filter(name -> name.startsWith(prefix))
+                .map(name -> name.substring(prefix.length()))
                 .collect(Collectors.toList());
     }
 

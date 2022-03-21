@@ -1,7 +1,9 @@
 package com.github.zjor.config;
 
 import com.github.zjor.repository.MongoRepository;
-import com.mongodb.*;
+import com.github.zjor.repository.TenantMongoRepository;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +17,9 @@ public class MongoConfiguration {
     }
 
     @Bean
-    public MongoRepository mongoRepository(MongoClient mongoClient) {
-        return new MongoRepository(mongoClient);
+    public TenantMongoRepository mongoRepository(MongoClient mongoClient) {
+        var repository = new MongoRepository(mongoClient);
+        return new TenantMongoRepository(repository);
     }
 
 }
