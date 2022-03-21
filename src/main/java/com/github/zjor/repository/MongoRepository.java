@@ -40,6 +40,10 @@ public class MongoRepository {
         return document;
     }
 
+    public void deleteCollection(String collectionName) {
+        getDb().getCollection(collectionName).drop();
+    }
+
     public Optional<Document> findById(String collectionName, String id) {
         var q = new Document("_id", new ObjectId(id));
         return Optional.ofNullable(getDb().getCollection(collectionName).find(q).first());

@@ -48,6 +48,13 @@ public class DocumentController {
         return repository.save(tenant, collectionName, req);
     }
 
+    @DeleteMapping
+    public void deleteCollection(
+            @PathVariable("collectionName") String collectionName,
+            @Tenant String tenant) {
+        repository.deleteCollection(tenant, collectionName);
+    }
+
     @GetMapping("id/{id}")
     public Object getById(
             @PathVariable("collectionName") String collectionName,
