@@ -26,6 +26,10 @@ public class TenantMongoRepository {
         return repository.save(getCollectionName(tenant, collectionName), data);
     }
 
+    public Document update(String tenant, String collectionName, String id, Map<String, Object> data) {
+        return repository.replace(getCollectionName(tenant, collectionName), id, data);
+    }
+
     public void deleteCollection(String tenant, String collectionName) {
         repository.deleteCollection(getCollectionName(tenant, collectionName));
     }

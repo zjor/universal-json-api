@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,26 +32,12 @@ public class DocumentController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping
-    public List<Object> listCollection(
-            @PathVariable("collectionName") String collectionName,
-            @Tenant String tenant) {
-        return repository.listCollection(tenant, collectionName);
-    }
-
     @PostMapping
-    public Document createDocument(
+    public Document create(
             @PathVariable("collectionName") String collectionName,
             @RequestBody Map<String, Object> req,
             @Tenant String tenant) {
         return repository.save(tenant, collectionName, req);
-    }
-
-    @DeleteMapping
-    public void deleteCollection(
-            @PathVariable("collectionName") String collectionName,
-            @Tenant String tenant) {
-        repository.deleteCollection(tenant, collectionName);
     }
 
     @GetMapping("id/{id}")
@@ -65,6 +50,15 @@ public class DocumentController {
         var doc = repository.findById(tenant, collectionName, id)
                 .orElseThrow(() -> new NotFoundException(collectionName + ":" + id));
         return jq(doc, jq);
+    }
+
+    @PutMapping("id/{id}")
+    public Object updateById(
+            @PathVariable("collectionName") String collectionName,
+            @PathVariable("id") String id,
+            @RequestBody Map<String, Object> req,
+            @Tenant String tenant) {
+        return repository.update(tenant, collectionName, id, req);
     }
 
     @DeleteMapping("id/{id}")
@@ -92,6 +86,9 @@ public class DocumentController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
     }
+
+    //TODO: PUT to patch part of the document
+    //TODO: DELETE to remove part of the document
 
     private Object jq(Object json, String query) {
         if (StringUtils.hasText(query)) {

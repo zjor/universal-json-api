@@ -2,9 +2,7 @@ package com.github.zjor.controller;
 
 import com.github.zjor.ext.spring.Tenant;
 import com.github.zjor.repository.TenantMongoRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,6 +19,21 @@ public class CollectionController {
     @GetMapping
     public List<String> listCollectionNames(@Tenant String tenant) {
         return repository.getCollectionNames(tenant);
+    }
+
+    @GetMapping("{collectionName}")
+    public List<Object> listCollection(
+            @PathVariable("collectionName") String collectionName,
+            @Tenant String tenant) {
+        //TODO: allow query MongoDB collection, basic filtering
+        return repository.listCollection(tenant, collectionName);
+    }
+
+    @DeleteMapping("{collectionName}")
+    public void deleteCollection(
+            @PathVariable("collectionName") String collectionName,
+            @Tenant String tenant) {
+        repository.deleteCollection(tenant, collectionName);
     }
 
 }
