@@ -13,8 +13,9 @@
 5. Schema support for collections
 6. Mock data generation for the schema
 7. IDP integration
-8. Inter-service request authentication (for on-premise microservice architecture)
+8. Inter-service request authentication (for on-premise microservice architecture) => article
 9. Demo app on freeCodeCamp
+10. Articles @medium, @habr
 
 ## API Usage Examples
 
