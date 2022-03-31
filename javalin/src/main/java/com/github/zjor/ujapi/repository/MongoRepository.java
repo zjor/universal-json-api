@@ -46,10 +46,10 @@ public class MongoRepository {
         return document;
     }
 
-    public Document replace(String collectionName, String id, Map<String, Object> data) {
+    public Optional<Document> replace(String collectionName, String id, Map<String, Object> data) {
         var q = Filters.eq(ID, new ObjectId(id));
         getDb().getCollection(collectionName).replaceOne(q, new Document(data));
-        return getDb().getCollection(collectionName).find(q).first();
+        return Optional.ofNullable(getDb().getCollection(collectionName).find(q).first());
     }
 
     public void deleteCollection(String collectionName) {
@@ -60,8 +60,10 @@ public class MongoRepository {
         return Optional.ofNullable(getDb().getCollection(collectionName).find(FILTER_BY_ID.apply(id)).first());
     }
 
-    public Document deleteDocument(String collectionName, String id) {
-        return getDb().getCollection(collectionName).findOneAndDelete(FILTER_BY_ID.apply(id));
+    public Optional<Document> deleteById(String collectionName, String id) {
+        return Optional.ofNullable(getDb().getCollection(collectionName).findOneAndDelete(FILTER_BY_ID.apply(id)));
     }
+
+
 
 }

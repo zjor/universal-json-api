@@ -6,6 +6,8 @@
 
 ## RoadMap
 
+0. Try https://avaje.io/http/ for annotation processing & javalin
+
 1. ~~Full support for CRUD operations on documents as a whole~~
 2. Full support for CRUD operations on parts of documents selected by path
 3. Support for queries on collections

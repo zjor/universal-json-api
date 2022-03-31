@@ -6,7 +6,8 @@ import io.javalin.apibuilder.EndpointGroup;
 
 import javax.inject.Inject;
 
-import static io.javalin.apibuilder.ApiBuilder.get;
+import static io.javalin.apibuilder.ApiBuilder.*;
+
 
 public class Routes implements EndpointGroup {
 
@@ -23,7 +24,24 @@ public class Routes implements EndpointGroup {
     @Override
     public void addEndpoints() {
         get("/", indexHandler);
-        get("/api/v1.0/c/{collection}", documentController::list);
+
+        get("/api/v1.0/c/{collection}", documentController::list); //TODO: query collection
+        post("/api/v1.0/c/{collection}", documentController::create);
+        delete("/api/v1.0/c/{collection}", documentController::delete);
+
+        get("/api/v1.0/c/{collection}/{id}", documentController::getById); // TODO: jq
+        put("/api/v1.0/c/{collection}/{id}", documentController::updateById);
+        delete("/api/v1.0/c/{collection}/{id}", documentController::deleteById);
+
+        get("/api/v1.0/c/{collection}/{id}/<part>", null); // TODO
+//        put("/api/v1.0/c/{collection}/{id}/<part>", null); // TODO
+//        delete("/api/v1.0/c/{collection}/{id}/<part>", null); // TODO
+
+        //TODO: schema support
+        //TODO: log all endpoints
+        //TODO: multi-tenancy manual
+        //TODO: IT tests against endpoints
+
 
     }
 }
