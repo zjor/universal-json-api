@@ -33,7 +33,7 @@ public class Routes implements EndpointGroup {
         put("/api/v1.0/c/{collection}/{id}", documentController::updateById);
         delete("/api/v1.0/c/{collection}/{id}", documentController::deleteById);
 
-        get("/api/v1.0/c/{collection}/{id}/<part>", null); // TODO
+        get("/api/v1.0/c/{collection}/{id}/<path>", documentController::getDocumentPart); // TODO: jq
 //        put("/api/v1.0/c/{collection}/{id}/<part>", null); // TODO
 //        delete("/api/v1.0/c/{collection}/{id}/<part>", null); // TODO
 

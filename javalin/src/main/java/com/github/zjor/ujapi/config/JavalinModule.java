@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.zjor.ujapi.Routes;
 import com.github.zjor.ujapi.ext.jackson.ObjectIdSerializer;
+import com.github.zjor.ujapi.ext.javalin.HttpRequestLogger;
 import com.github.zjor.ujapi.ext.javalin.JacksonJsonMapper;
 import com.github.zjor.ujapi.handler.DocumentController;
 import com.github.zjor.ujapi.handler.IndexHandler;
@@ -62,6 +63,7 @@ public class JavalinModule extends AbstractModule {
         var app = Javalin.create(config -> {
             config.jsonMapper(new JacksonJsonMapper(objectMapper));
             config.registerPlugin(new OpenApiPlugin(getOpenApiOptions()));
+            config.requestLogger(new HttpRequestLogger());
         });
 
         app.routes(routes);
