@@ -49,7 +49,7 @@ public class DocumentUtilsTest {
         var doc = new Document(Map.of("name", "Mike", "job", "n/a"));
         var updated = DocumentUtils.updateDocumentPart(doc, "job",
                 Map.of("title", "engineer", "company", "acme"));
-        Assert.assertEquals("engineer", ((Map<String, Object>)updated.get("job")).get("title"));
+        Assert.assertEquals("engineer", ((Map<String, Object>) updated.get("job")).get("title"));
     }
 
     @Test
@@ -57,6 +57,26 @@ public class DocumentUtilsTest {
         var doc = new Document(Map.of("name", "Mike", "job", "n/a"));
         var updated = DocumentUtils.updateDocumentPart(doc, "job",
                 List.of("manager", "engineer"));
-        Assert.assertEquals("engineer", ((List<String>)updated.get("job")).get(1));
+        Assert.assertEquals("engineer", ((List<String>) updated.get("job")).get(1));
+    }
+
+    @Test
+    public void shouldDeleteDocumentPart_remove_key_from_inner_object() {
+        var doc = new Document(Map.of(
+                "color", "white",
+                "size", "large",
+                "dimensions", new HashMap<>(Map.of("width", 10, "height", 20))));
+        var updated = DocumentUtils.deleteDocumentPart(doc, "dimensions/width");
+        Assert.assertFalse(((Map<String, Objects>) updated.get("dimensions")).containsKey("width"));
+    }
+
+    @Test
+    public void shouldDeleteDocumentPart_remove_object() {
+        var doc = new Document(Map.of(
+                "color", "white",
+                "size", "large",
+                "dimensions", new HashMap<>(Map.of("width", 10, "height", 20))));
+        var updated = DocumentUtils.deleteDocumentPart(doc, "dimensions");
+        Assert.assertFalse(updated.containsKey("dimensions"));
     }
 }

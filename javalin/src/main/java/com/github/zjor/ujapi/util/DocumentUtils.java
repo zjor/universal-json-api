@@ -38,7 +38,7 @@ public class DocumentUtils {
             return document;
         }
 
-        for (String key: pathParts.subList(0, pathParts.size() - 1)) {
+        for (String key : pathParts.subList(0, pathParts.size() - 1)) {
             if (key != null && key.length() > 0) {
                 var next = new HashMap<String, Object>();
                 node.put(key, next);
@@ -50,6 +50,25 @@ public class DocumentUtils {
         node.put(last, part);
 
         document.putAll(root);
+        return document;
+    }
+
+    public static Document deleteDocumentPart(Document document, String path) {
+        var pathParts = Arrays.asList(path.split("/"));
+        if (pathParts.isEmpty()) {
+            return document;
+        }
+
+        Map<String, Object> node = document;
+        for (var pathPart : pathParts.subList(0, pathParts.size() - 1)) {
+            if (node.containsKey(pathPart) && node.get(pathPart) instanceof Map) {
+                node = (Map<String, Object>) node.get(pathPart);
+            } else {
+                return document;
+            }
+        }
+        var last = pathParts.get(pathParts.size() - 1);
+        node.remove(last);
         return document;
     }
 

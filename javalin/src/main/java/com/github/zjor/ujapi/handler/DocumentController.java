@@ -105,4 +105,21 @@ public class DocumentController {
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 
+    public void deleteDocumentPart(@NotNull Context ctx) {
+        String collection = ctx.pathParam("collection");
+        String id = ctx.pathParam("id");
+        String path = ctx.pathParam("path");
+
+        mongoRepository.findById(collection, id)
+                .ifPresentOrElse(
+                        doc -> {
+                            var updated = DocumentUtils.deleteDocumentPart(doc, path);
+                            mongoRepository.replace(collection, id, updated)
+                                    .ifPresentOrElse(
+                                            ctx::json,
+                                            () -> ctx.status(HttpCode.NOT_FOUND));
+                        },
+                        () -> ctx.status(HttpCode.NOT_FOUND));
+    }
+
 }
