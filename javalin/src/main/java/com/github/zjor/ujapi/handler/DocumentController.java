@@ -1,5 +1,7 @@
 package com.github.zjor.ujapi.handler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zjor.ujapi.repository.MongoRepository;
 import com.github.zjor.ujapi.util.DocumentUtils;
 import io.javalin.http.Context;
@@ -8,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,10 +18,13 @@ import java.util.Optional;
 public class DocumentController {
 
     private final MongoRepository mongoRepository;
+    private final ObjectMapper mapper;
 
     @Inject
-    public DocumentController(MongoRepository mongoRepository) {
+    public DocumentController(MongoRepository mongoRepository,
+                              ObjectMapper mapper) {
         this.mongoRepository = mongoRepository;
+        this.mapper = mapper;
     }
 
     public void list(@NotNull Context ctx) {
@@ -74,6 +80,29 @@ public class DocumentController {
                 .flatMap(doc -> Optional.ofNullable(DocumentUtils.getDocumentPart(doc, path)))
                 .ifPresentOrElse(
                         ctx::json,
+                        () -> ctx.status(HttpCode.NOT_FOUND));
+    }
+
+    public void updateDocumentPart(@NotNull Context ctx) {
+        String collection = ctx.pathParam("collection");
+        String id = ctx.pathParam("id");
+        String path = ctx.pathParam("path");
+
+        mongoRepository.findById(collection, id)
+                .ifPresentOrElse(
+                        doc -> {
+                            try {
+                                var node = mapper.readValue(ctx.bodyAsInputStream(), JsonNode.class);
+                                var updated = DocumentUtils.updateDocumentPart(doc, path, node);
+                                mongoRepository.replace(collection, id, updated)
+                                        .ifPresentOrElse(
+                                                ctx::json,
+                                                () -> ctx.status(HttpCode.NOT_FOUND));
+                            } catch (IOException e) {
+                                log.error("Failed to parse body: " + e.getMessage(), e);
+                                ctx.status(HttpCode.BAD_REQUEST);
+                            }
+                        },
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 

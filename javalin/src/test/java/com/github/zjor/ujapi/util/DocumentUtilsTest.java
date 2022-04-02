@@ -4,10 +4,7 @@ import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class DocumentUtilsTest {
 
@@ -45,5 +42,21 @@ public class DocumentUtilsTest {
         Document doc = new Document(map);
         Object part = DocumentUtils.getDocumentPart(doc, "root/child1/child2");
         Assert.assertEquals(Arrays.asList("one", "two", "three"), part);
+    }
+
+    @Test
+    public void shouldUpdateDocumentPart_override_existing_node_with_map() {
+        var doc = new Document(Map.of("name", "Mike", "job", "n/a"));
+        var updated = DocumentUtils.updateDocumentPart(doc, "job",
+                Map.of("title", "engineer", "company", "acme"));
+        Assert.assertEquals("engineer", ((Map<String, Object>)updated.get("job")).get("title"));
+    }
+
+    @Test
+    public void shouldUpdateDocumentPart_override_existing_node_with_list() {
+        var doc = new Document(Map.of("name", "Mike", "job", "n/a"));
+        var updated = DocumentUtils.updateDocumentPart(doc, "job",
+                List.of("manager", "engineer"));
+        Assert.assertEquals("engineer", ((List<String>)updated.get("job")).get(1));
     }
 }
