@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DocumentUtils {
 
@@ -50,6 +51,16 @@ public class DocumentUtils {
 
         document.putAll(root);
         return document;
+    }
+
+    public static Map<String, Object> asMap(Document document, String... excludeKeys) {
+        Set<String> excludeKeySet = new HashSet<>(Arrays.asList(excludeKeys));
+        return document.entrySet().stream()
+                .filter(entry -> !excludeKeySet.contains(entry.getKey()))
+                .collect(Collectors.toMap(
+                        e -> e.getKey(),
+                        e -> e.getValue()
+                ));
     }
 
 }

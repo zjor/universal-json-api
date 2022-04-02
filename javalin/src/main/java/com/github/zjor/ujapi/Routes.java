@@ -34,14 +34,8 @@ public class Routes implements EndpointGroup {
         delete("/api/v1.0/c/{collection}/{id}", documentController::deleteById);
 
         get("/api/v1.0/c/{collection}/{id}/<path>", documentController::getDocumentPart); // TODO: jq
-        put("/api/v1.0/c/{collection}/{id}/<path>", documentController::updateDocumentPart); // TODO
+        put("/api/v1.0/c/{collection}/{id}/<path>", documentController::updateDocumentPart);
 //        delete("/api/v1.0/c/{collection}/{id}/<path>", null); // TODO
-
-        //TODO: schema support
-        //TODO: log all endpoints
-        //TODO: multi-tenancy manual
-        //TODO: IT tests against endpoints
-
 
     }
 }

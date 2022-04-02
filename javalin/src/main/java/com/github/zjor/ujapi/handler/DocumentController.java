@@ -1,6 +1,5 @@
 package com.github.zjor.ujapi.handler;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zjor.ujapi.repository.MongoRepository;
 import com.github.zjor.ujapi.util.DocumentUtils;
@@ -92,7 +91,7 @@ public class DocumentController {
                 .ifPresentOrElse(
                         doc -> {
                             try {
-                                var node = mapper.readValue(ctx.bodyAsInputStream(), JsonNode.class);
+                                var node = mapper.readValue(ctx.bodyAsInputStream(), Object.class);
                                 var updated = DocumentUtils.updateDocumentPart(doc, path, node);
                                 mongoRepository.replace(collection, id, updated)
                                         .ifPresentOrElse(
