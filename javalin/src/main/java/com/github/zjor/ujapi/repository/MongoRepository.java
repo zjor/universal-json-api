@@ -35,7 +35,7 @@ public class MongoRepository {
                 .collect(Collectors.toList());
     }
 
-    public List<Object> listCollection(String collectionName) {
+    public List<Document> listCollection(String collectionName) {
         return StreamSupport.stream(getDb().getCollection(collectionName).find().spliterator(), false)
                 .collect(Collectors.toList());
     }

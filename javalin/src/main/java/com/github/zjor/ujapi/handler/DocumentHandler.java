@@ -1,6 +1,7 @@
 package com.github.zjor.ujapi.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.zjor.ujapi.controller.DocumentController;
 import com.github.zjor.ujapi.repository.MongoRepository;
 import com.github.zjor.ujapi.util.DocumentUtils;
 import io.javalin.http.Context;
@@ -14,21 +15,25 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class DocumentController {
+public class DocumentHandler {
+
+    private final DocumentController documentController;
 
     private final MongoRepository mongoRepository;
     private final ObjectMapper mapper;
 
     @Inject
-    public DocumentController(MongoRepository mongoRepository,
-                              ObjectMapper mapper) {
+    public DocumentHandler(DocumentController documentController,
+                           MongoRepository mongoRepository,
+                           ObjectMapper mapper) {
+        this.documentController = documentController;
         this.mongoRepository = mongoRepository;
         this.mapper = mapper;
     }
 
     public void list(@NotNull Context ctx) {
         String collection = ctx.pathParam("collection");
-        ctx.json(mongoRepository.listCollection(collection));
+        ctx.json(documentController.listCollection(collection));
     }
 
     public void create(@NotNull Context ctx) {
