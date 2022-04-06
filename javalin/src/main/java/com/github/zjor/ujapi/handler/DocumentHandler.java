@@ -1,6 +1,7 @@
 package com.github.zjor.ujapi.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.zjor.ujapi.controller.CollectionController;
 import com.github.zjor.ujapi.controller.DocumentController;
 import com.github.zjor.ujapi.repository.MongoRepository;
 import com.github.zjor.ujapi.util.DocumentUtils;
@@ -17,15 +18,18 @@ import java.util.Optional;
 @Slf4j
 public class DocumentHandler {
 
+    private final CollectionController collectionController;
     private final DocumentController documentController;
 
     private final MongoRepository mongoRepository;
     private final ObjectMapper mapper;
 
     @Inject
-    public DocumentHandler(DocumentController documentController,
+    public DocumentHandler(CollectionController collectionController,
+                           DocumentController documentController,
                            MongoRepository mongoRepository,
                            ObjectMapper mapper) {
+        this.collectionController = collectionController;
         this.documentController = documentController;
         this.mongoRepository = mongoRepository;
         this.mapper = mapper;
@@ -33,18 +37,17 @@ public class DocumentHandler {
 
     public void list(@NotNull Context ctx) {
         String collection = ctx.pathParam("collection");
-        ctx.json(documentController.listCollection(collection));
+        ctx.json(collectionController.listCollection(collection));
     }
 
     public void create(@NotNull Context ctx) {
         String collection = ctx.pathParam("collection");
-        var doc = mongoRepository.save(collection, ctx.bodyAsClass(Map.class));
-        ctx.json(doc);
+        ctx.json(documentController.createDocument(collection, ctx.bodyAsClass(Map.class)));
     }
 
     public void delete(@NotNull Context ctx) {
         String collection = ctx.pathParam("collection");
-        mongoRepository.deleteCollection(collection);
+        collectionController.deleteCollection(collection);
         ctx.status(HttpCode.NO_CONTENT);
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.zjor.ujapi.Routes;
+import com.github.zjor.ujapi.controller.CollectionController;
 import com.github.zjor.ujapi.controller.DocumentController;
 import com.github.zjor.ujapi.ext.jackson.ObjectIdSerializer;
 import com.github.zjor.ujapi.ext.javalin.HttpRequestLogger;
@@ -26,6 +27,7 @@ public class JavalinModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(CollectionController.class).asEagerSingleton();
         bind(DocumentController.class).asEagerSingleton();
 
         bind(IndexHandler.class).asEagerSingleton();

@@ -5,7 +5,7 @@ import com.github.zjor.ujapi.repository.MongoRepository;
 import org.bson.Document;
 
 import javax.inject.Inject;
-import java.util.List;
+import java.util.Map;
 
 public class DocumentController {
 
@@ -17,8 +17,8 @@ public class DocumentController {
     }
 
     @Log
-    public List<Document> listCollection(String collection) {
-        return mongoRepository.listCollection(collection);
+    public Document createDocument(String collection, Map<String, Object> data) {
+        return mongoRepository.save(collection, data);
     }
 
 }

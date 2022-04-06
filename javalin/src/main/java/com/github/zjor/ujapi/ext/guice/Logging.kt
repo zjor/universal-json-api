@@ -1,8 +1,17 @@
 package com.github.zjor.ujapi.ext.guice
 
+import com.google.inject.AbstractModule
+import com.google.inject.matcher.Matchers
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
 import org.slf4j.LoggerFactory
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+annotation class Log
+
 
 class LoggingMethodInterceptor : MethodInterceptor {
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -23,5 +32,12 @@ class LoggingMethodInterceptor : MethodInterceptor {
             logger.info("${invocation.method.name}($args): thrown $t")
             throw t
         }
+    }
+}
+
+
+class LoggingModule : AbstractModule() {
+    override fun configure() {
+        bindInterceptor(Matchers.any(), Matchers.annotatedWith(Log::class.java), LoggingMethodInterceptor())
     }
 }
