@@ -5,10 +5,8 @@ import com.google.inject.matcher.Matchers
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
 import org.slf4j.LoggerFactory
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
 
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
 annotation class Log
 
