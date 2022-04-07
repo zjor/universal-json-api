@@ -8,12 +8,16 @@ import com.google.inject.Singleton;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
+import java.util.Objects;
+
 public class MongoModule extends AbstractModule {
 
     @Provides
     @Singleton
     protected MongoClient mongoClient() {
-        var uri = System.getenv("MONGO_URI");
+        var uri = Objects.requireNonNull(
+                System.getenv("MONGO_URI"),
+                "MONGO_URI is not set");
         return new MongoClient(new MongoClientURI(uri));
     }
 
