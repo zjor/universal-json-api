@@ -1,0 +1,1 @@
+web: java -Djdk.tls.client.protocols=TLSv1.2 -jar ./target/universal-json-api-jar-with-dependencies.jar

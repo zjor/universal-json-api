@@ -9,7 +9,7 @@
 1. Try https://avaje.io/http/ for annotation processing & javalin
 2. ~~Full support for CRUD operations on documents as a whole~~
 3. ~~Full support for CRUD operations on parts of documents selected by path~~
-4. Log queries with AOP
+4. ~~Log queries with AOP~~
 5. Integration tests
 6. Support for queries on collections
 7. Support for multi-tenancy (manual configuration)
