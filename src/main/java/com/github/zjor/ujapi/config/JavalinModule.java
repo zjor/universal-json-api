@@ -11,6 +11,7 @@ import com.github.zjor.ujapi.ext.javalin.HttpRequestLogger;
 import com.github.zjor.ujapi.ext.javalin.JacksonJsonMapper;
 import com.github.zjor.ujapi.handler.DocumentHandler;
 import com.github.zjor.ujapi.handler.IndexHandler;
+import com.github.zjor.ujapi.handler.TenantHeaderBeforeHandler;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provides;
@@ -71,6 +72,7 @@ public class JavalinModule extends AbstractModule {
             config.requestLogger(new HttpRequestLogger());
         });
 
+        app.before(new TenantHeaderBeforeHandler());
         app.routes(routes);
 
         return app;

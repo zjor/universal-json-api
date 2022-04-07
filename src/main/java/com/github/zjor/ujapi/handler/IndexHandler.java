@@ -18,6 +18,7 @@ public class IndexHandler implements Handler {
 
     @Override
     public void handle(@NotNull Context ctx) {
-        ctx.json(collectionController.getCollectionNames());
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+        ctx.json(collectionController.getCollectionNames(tenant));
     }
 }

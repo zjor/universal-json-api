@@ -18,6 +18,9 @@ import java.util.Optional;
 @Slf4j
 public class DocumentHandler {
 
+    public final String COLLECTION_PATH_PARAM = "collection";
+    public final String ID_PATH_PARAM = "id";
+
     private final CollectionController collectionController;
     private final DocumentController documentController;
 
@@ -36,54 +39,67 @@ public class DocumentHandler {
     }
 
     public void list(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        ctx.json(collectionController.listCollection(collection));
+        var collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        ctx.json(collectionController.listCollection(tenant, collection));
     }
 
     public void create(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        ctx.json(documentController.createDocument(collection, ctx.bodyAsClass(Map.class)));
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        ctx.json(documentController.createDocument(tenant, collection, ctx.bodyAsClass(Map.class)));
     }
 
     public void delete(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        collectionController.deleteCollection(collection);
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+        collectionController.deleteCollection(tenant, collection);
         ctx.status(HttpCode.NO_CONTENT);
     }
 
     public void getById(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        String id = ctx.pathParam("id");
-        mongoRepository.findById(collection, id)
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        String id = ctx.pathParam(ID_PATH_PARAM);
+        documentController.findById(tenant, collection, id)
                 .ifPresentOrElse(
                         ctx::json,
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 
     public void updateById(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        String id = ctx.pathParam("id");
-        mongoRepository.replace(collection, id, ctx.bodyAsClass(Map.class))
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        String id = ctx.pathParam(ID_PATH_PARAM);
+        documentController.update(tenant, collection, id, ctx.bodyAsClass(Map.class))
                 .ifPresentOrElse(
                         ctx::json,
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 
     public void deleteById(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        String id = ctx.pathParam("id");
-        mongoRepository.deleteById(collection, id)
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        String id = ctx.pathParam(ID_PATH_PARAM);
+        documentController.delete(tenant, collection, id)
                 .ifPresentOrElse(
                         ctx::json,
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 
     public void getDocumentPart(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        String id = ctx.pathParam("id");
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        String id = ctx.pathParam(ID_PATH_PARAM);
         String path = ctx.pathParam("path");
 
-        mongoRepository.findById(collection, id)
+        documentController.findById(tenant, collection, id)
                 .flatMap(doc -> Optional.ofNullable(DocumentUtils.getDocumentPart(doc, path)))
                 .ifPresentOrElse(
                         ctx::json,
@@ -91,17 +107,19 @@ public class DocumentHandler {
     }
 
     public void updateDocumentPart(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        String id = ctx.pathParam("id");
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        String id = ctx.pathParam(ID_PATH_PARAM);
         String path = ctx.pathParam("path");
 
-        mongoRepository.findById(collection, id)
+        documentController.findById(tenant, collection, id)
                 .ifPresentOrElse(
                         doc -> {
                             try {
                                 var node = mapper.readValue(ctx.bodyAsInputStream(), Object.class);
                                 var updated = DocumentUtils.updateDocumentPart(doc, path, node);
-                                mongoRepository.replace(collection, id, updated)
+                                documentController.update(tenant, collection, id, updated)
                                         .ifPresentOrElse(
                                                 ctx::json,
                                                 () -> ctx.status(HttpCode.NOT_FOUND));
@@ -114,15 +132,17 @@ public class DocumentHandler {
     }
 
     public void deleteDocumentPart(@NotNull Context ctx) {
-        String collection = ctx.pathParam("collection");
-        String id = ctx.pathParam("id");
+        String collection = ctx.pathParam(COLLECTION_PATH_PARAM);
+        var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
+
+        String id = ctx.pathParam(ID_PATH_PARAM);
         String path = ctx.pathParam("path");
 
-        mongoRepository.findById(collection, id)
+        documentController.findById(tenant, collection, id)
                 .ifPresentOrElse(
                         doc -> {
                             var updated = DocumentUtils.deleteDocumentPart(doc, path);
-                            mongoRepository.replace(collection, id, updated)
+                            documentController.update(tenant, collection, id, updated)
                                     .ifPresentOrElse(
                                             ctx::json,
                                             () -> ctx.status(HttpCode.NOT_FOUND));

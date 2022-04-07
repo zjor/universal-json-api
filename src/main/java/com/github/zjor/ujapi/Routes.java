@@ -25,6 +25,7 @@ public class Routes implements EndpointGroup {
     public void addEndpoints() {
         get("/", indexHandler);
 
+        get("/api/v1.0/c", indexHandler);
         get("/api/v1.0/c/{collection}", documentHandler::list); //TODO: query collection
         post("/api/v1.0/c/{collection}", documentHandler::create);
         delete("/api/v1.0/c/{collection}", documentHandler::delete);
