@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset>
+    <!-- Exclude target folder that may contain generated sources -->
+    <exclude-pattern>.*/target/.*</exclude-pattern>
+</ruleset>
