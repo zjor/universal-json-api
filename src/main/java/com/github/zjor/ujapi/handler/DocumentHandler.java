@@ -3,7 +3,7 @@ package com.github.zjor.ujapi.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.zjor.ujapi.controller.CollectionController;
 import com.github.zjor.ujapi.controller.DocumentController;
-import com.github.zjor.ujapi.repository.MongoRepository;
+import com.github.zjor.ujapi.service.JsonQueryService;
 import com.github.zjor.ujapi.util.DocumentUtils;
 import io.javalin.http.Context;
 import io.javalin.http.HttpCode;
@@ -21,21 +21,23 @@ public class DocumentHandler {
     public final String COLLECTION_PATH_PARAM = "collection";
     public final String ID_PATH_PARAM = "id";
 
+    public final String JQ_QUERY_PARAM = "jq";
+
     private final CollectionController collectionController;
     private final DocumentController documentController;
 
-    private final MongoRepository mongoRepository;
     private final ObjectMapper mapper;
+    private final JsonQueryService jsonQueryService;
 
     @Inject
     public DocumentHandler(CollectionController collectionController,
                            DocumentController documentController,
-                           MongoRepository mongoRepository,
-                           ObjectMapper mapper) {
+                           ObjectMapper mapper,
+                           JsonQueryService jsonQueryService) {
         this.collectionController = collectionController;
         this.documentController = documentController;
-        this.mongoRepository = mongoRepository;
         this.mapper = mapper;
+        this.jsonQueryService = jsonQueryService;
     }
 
     public void list(@NotNull Context ctx) {
@@ -64,9 +66,25 @@ public class DocumentHandler {
         var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
 
         String id = ctx.pathParam(ID_PATH_PARAM);
+        Optional<String> jq = Optional.ofNullable(ctx.queryParam(JQ_QUERY_PARAM));
+
         documentController.findById(tenant, collection, id)
                 .ifPresentOrElse(
-                        ctx::json,
+                        json -> {
+                            if (jq.isPresent()) {
+                                try {
+                                    jsonQueryService.query(json, jq.get()).ifPresentOrElse(
+                                            ctx::json,
+                                            () -> ctx.status(HttpCode.NOT_FOUND)
+                                    );
+                                } catch (RuntimeException e) {
+                                    ctx.status(HttpCode.BAD_REQUEST);
+                                }
+                            } else {
+                                ctx.json(json);
+                            }
+
+                        },
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.NullNode;
+import lombok.extern.slf4j.Slf4j;
 import net.thisptr.jackson.jq.JsonQuery;
 import net.thisptr.jackson.jq.Scope;
 import net.thisptr.jackson.jq.Versions;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class JsonQueryService {
 
     private final ObjectMapper mapper;
@@ -45,6 +47,7 @@ public class JsonQueryService {
                 return Optional.of(new ArrayNode(JsonNodeFactory.instance, out));
             }
         } catch (JsonProcessingException e) {
+            log.error("Failed to execute query: " + e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
