@@ -3,7 +3,6 @@ package com.github.zjor.ujapi.repository;
 import com.mongodb.Function;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
@@ -16,7 +15,8 @@ import java.util.stream.StreamSupport;
 
 public class MongoRepository {
     public static final String ID = "_id";
-    private static final Function<String, Bson> FILTER_BY_ID = (id) -> new Document(ID, new ObjectId(id));
+    private static final Function<String, Bson> FILTER_BY_ID =
+            (id) -> new Document(ID, ObjectId.isValid(id) ? new ObjectId(id) : null);
 
     private final MongoClient client;
 
@@ -47,7 +47,7 @@ public class MongoRepository {
     }
 
     public Optional<Document> replace(String collectionName, String id, Map<String, Object> data) {
-        var q = Filters.eq(ID, new ObjectId(id));
+        var q = FILTER_BY_ID.apply(id);
         getDb().getCollection(collectionName).replaceOne(q, new Document(data));
         return Optional.ofNullable(getDb().getCollection(collectionName).find(q).first());
     }
@@ -63,7 +63,5 @@ public class MongoRepository {
     public Optional<Document> deleteById(String collectionName, String id) {
         return Optional.ofNullable(getDb().getCollection(collectionName).findOneAndDelete(FILTER_BY_ID.apply(id)));
     }
-
-
 
 }
