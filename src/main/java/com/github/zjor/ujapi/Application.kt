@@ -1,5 +1,6 @@
 package com.github.zjor.ujapi
 
+import com.github.zjor.ujapi.config.JacksonModule
 import com.github.zjor.ujapi.config.JavalinModule
 import com.github.zjor.ujapi.config.MongoModule
 import com.github.zjor.ujapi.ext.guice.LoggingModule
@@ -12,6 +13,7 @@ object Application {
         val injector = Guice.createInjector(
                 LoggingModule(),
                 MongoModule(),
+                JacksonModule(),
                 JavalinModule()
         )
         val port = System.getenv("PORT")?.toInt() ?: 8080

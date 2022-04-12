@@ -1,12 +1,9 @@
 package com.github.zjor.ujapi.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.zjor.ujapi.Routes;
 import com.github.zjor.ujapi.controller.CollectionController;
 import com.github.zjor.ujapi.controller.DocumentController;
-import com.github.zjor.ujapi.ext.jackson.ObjectIdSerializer;
 import com.github.zjor.ujapi.ext.javalin.HttpRequestLogger;
 import com.github.zjor.ujapi.ext.javalin.JacksonJsonMapper;
 import com.github.zjor.ujapi.handler.DocumentHandler;
@@ -22,7 +19,6 @@ import io.javalin.plugin.openapi.OpenApiPlugin;
 import io.javalin.plugin.openapi.ui.ReDocOptions;
 import io.javalin.plugin.openapi.ui.SwaggerOptions;
 import io.swagger.v3.oas.models.info.Info;
-import org.bson.types.ObjectId;
 
 public class JavalinModule extends AbstractModule {
 
@@ -34,19 +30,6 @@ public class JavalinModule extends AbstractModule {
         bind(IndexHandler.class).asEagerSingleton();
         bind(DocumentHandler.class).asEagerSingleton();
         bind(Routes.class).asEagerSingleton();
-    }
-
-    @Provides
-    @Singleton
-    protected ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(ObjectId.class, new ObjectIdSerializer());
-
-        mapper.registerModule(module);
-        return mapper;
     }
 
     private OpenApiOptions getOpenApiOptions() {
