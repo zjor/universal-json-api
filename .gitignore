@@ -1,5 +1,8 @@
+target/
+.kube/
+.idea/
+
 *.iml
-.idea
-target
+
 docker-entrypoint-initdb.d
 .env
