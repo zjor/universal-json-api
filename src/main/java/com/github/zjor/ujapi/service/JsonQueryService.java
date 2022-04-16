@@ -25,12 +25,10 @@ public class JsonQueryService {
         this.mapper = mapper;
     }
 
-    public Optional<JsonNode> query(Document source, String query) {
+    public Optional<JsonNode> query(JsonNode json, String query) {
         try {
             JsonQuery compiledQuery = JsonQuery.compile(query, Versions.JQ_1_6);
             List<JsonNode> out = new LinkedList<>();
-
-            JsonNode json = mapper.readValue(source.toJson(), JsonNode.class);
 
             compiledQuery.apply(Scope.newEmptyScope(), json, out::add);
 
@@ -49,6 +47,26 @@ public class JsonQueryService {
         } catch (JsonProcessingException e) {
             log.error("Failed to execute query: " + e.getMessage(), e);
             throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<JsonNode> query(Document source, String query) {
+        try {
+            var json = mapper.readValue(source.toJson(), JsonNode.class);
+            return query(json, query);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to execute query: " + e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Optional<JsonNode> query(Object source, String query) {
+        if (source instanceof Document) {
+            return query((Document) source, query);
+        } else if (source instanceof JsonNode) {
+            return query((JsonNode) source, query);
+        } else {
+            throw new IllegalArgumentException(source.getClass().getName() + "is not supported");
         }
     }
 

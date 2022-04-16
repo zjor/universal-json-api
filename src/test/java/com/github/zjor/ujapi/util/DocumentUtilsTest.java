@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,8 +19,8 @@ public class DocumentUtilsTest {
         Map<String, Object> map = new HashMap<>();
         map.put("root", Collections.singletonMap("child1", Collections.singletonMap("child2", "value")));
         Document doc = new Document(map);
-        Object part = DocumentUtils.getDocumentPart(doc, "root/child1/child2");
-        Assert.assertEquals("value", part);
+        var part = DocumentUtils.getDocumentPart(doc, "root/child1/child2");
+        Assert.assertEquals("value", part.get().asText());
     }
 
     @Test
@@ -27,8 +28,8 @@ public class DocumentUtilsTest {
         Map<String, Object> map = new HashMap<>();
         map.put("root", Collections.singletonMap("child1", Collections.singletonMap("child2", "value")));
         Document doc = new Document(map);
-        Object part = DocumentUtils.getDocumentPart(doc, "root/nothing/child2");
-        Assert.assertNull(part);
+        var part = DocumentUtils.getDocumentPart(doc, "root/nothing/child2");
+        Assert.assertTrue(part.isEmpty());
     }
 
     @Test
@@ -36,8 +37,8 @@ public class DocumentUtilsTest {
         Map<String, Object> map = new HashMap<>();
         map.put("root", Collections.singletonMap("child1", Collections.singletonMap("child2", "value")));
         Document doc = new Document(map);
-        Object part = DocumentUtils.getDocumentPart(doc, "root/child1/child2/child3");
-        Assert.assertNull(part);
+        var part = DocumentUtils.getDocumentPart(doc, "root/child1/child2/child3");
+        Assert.assertTrue(part.isEmpty());
     }
 
     @Test
@@ -45,8 +46,12 @@ public class DocumentUtilsTest {
         Map<String, Object> map = new HashMap<>();
         map.put("root", Collections.singletonMap("child1", Collections.singletonMap("child2", Arrays.asList("one", "two", "three"))));
         Document doc = new Document(map);
-        Object part = DocumentUtils.getDocumentPart(doc, "root/child1/child2");
-        Assert.assertEquals(Arrays.asList("one", "two", "three"), part);
+        var part = DocumentUtils.getDocumentPart(doc, "root/child1/child2");
+
+        List<String> actualItems = new LinkedList<>();
+        part.get().iterator().forEachRemaining(node -> actualItems.add(node.asText()));
+
+        Assert.assertEquals(Arrays.asList("one", "two", "three"), actualItems);
     }
 
     @Test

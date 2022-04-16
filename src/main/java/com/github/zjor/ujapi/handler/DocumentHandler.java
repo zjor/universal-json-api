@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Slf4j
 public class DocumentHandler {
@@ -70,21 +71,7 @@ public class DocumentHandler {
 
         documentController.findById(tenant, collection, id)
                 .ifPresentOrElse(
-                        json -> {
-                            if (jq.isPresent()) {
-                                try {
-                                    jsonQueryService.query(json, jq.get()).ifPresentOrElse(
-                                            ctx::json,
-                                            () -> ctx.status(HttpCode.NOT_FOUND)
-                                    );
-                                } catch (RuntimeException e) {
-                                    ctx.status(HttpCode.BAD_REQUEST);
-                                }
-                            } else {
-                                ctx.json(json);
-                            }
-
-                        },
+                        json -> getJsonQueryHandler(jq, ctx).accept(json),
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 
@@ -116,11 +103,12 @@ public class DocumentHandler {
 
         String id = ctx.pathParam(ID_PATH_PARAM);
         String path = ctx.pathParam("path");
+        Optional<String> jq = Optional.ofNullable(ctx.queryParam(JQ_QUERY_PARAM));
 
         documentController.findById(tenant, collection, id)
-                .flatMap(doc -> Optional.ofNullable(DocumentUtils.getDocumentPart(doc, path)))
+                .flatMap(doc -> DocumentUtils.getDocumentPart(doc, path))
                 .ifPresentOrElse(
-                        ctx::json,
+                        json -> getJsonQueryHandler(jq, ctx).accept(json),
                         () -> ctx.status(HttpCode.NOT_FOUND));
     }
 
@@ -166,6 +154,23 @@ public class DocumentHandler {
                                             () -> ctx.status(HttpCode.NOT_FOUND));
                         },
                         () -> ctx.status(HttpCode.NOT_FOUND));
+    }
+
+    private <T> Consumer<T> getJsonQueryHandler(Optional<String> jq, Context ctx) {
+        return (T json) -> {
+            if (jq.isPresent()) {
+                try {
+                    jsonQueryService.query(json, jq.get()).ifPresentOrElse(
+                            ctx::json,
+                            () -> ctx.status(HttpCode.NOT_FOUND)
+                    );
+                } catch (RuntimeException e) {
+                    ctx.status(HttpCode.BAD_REQUEST);
+                }
+            } else {
+                ctx.json(json);
+            }
+        };
     }
 
 }

@@ -1,6 +1,7 @@
 package com.github.zjor.ujapi.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 
@@ -10,26 +11,27 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DocumentUtils {
 
-    public static Object getDocumentPart(Document document, String pathQuery) {
+    public static Optional<JsonNode> getDocumentPart(Document document, String pathQuery) {
         List<String> parts = Arrays.asList(pathQuery.split("/"));
         ObjectMapper mapper = new ObjectMapper();
         try {
-            Object json = mapper.readValue(document.toJson(), Object.class);
+            JsonNode json = mapper.readValue(document.toJson(), JsonNode.class);
             Iterator<String> it = parts.iterator();
             while (it.hasNext()) {
                 String key = it.next();
-                if (json != null && json instanceof Map && ((Map<?, ?>) json).containsKey(key)) {
-                    json = ((Map<?, ?>) json).get(key);
+                if (json != null && json.has(key)) {
+                    json = json.get(key);
                 } else {
-                    return null;
+                    return Optional.empty();
                 }
             }
-            return json;
+            return Optional.ofNullable(json);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
