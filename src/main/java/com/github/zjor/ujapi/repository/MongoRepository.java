@@ -35,6 +35,22 @@ public class MongoRepository {
                 .collect(Collectors.toList());
     }
 
+    public Paged<Document> listCollection(String collectionName, int page, int size) {
+        Paged.PageInfo pagination = Paged.PageInfo.create(
+                page,
+                size,
+                getDb().getCollection(collectionName).countDocuments());
+
+        var items = getDb().getCollection(collectionName).find()
+                .skip(pagination.getOffset())
+                .limit(size);
+
+        return Paged.<Document>builder()
+                .items(StreamSupport.stream(items.spliterator(), false).collect(Collectors.toList()))
+                .pagination(pagination)
+                .build();
+    }
+
     public List<Document> listCollection(String collectionName) {
         return StreamSupport.stream(getDb().getCollection(collectionName).find().spliterator(), false)
                 .collect(Collectors.toList());

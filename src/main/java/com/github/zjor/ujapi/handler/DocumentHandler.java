@@ -24,6 +24,11 @@ public class DocumentHandler {
 
     public final String JQ_QUERY_PARAM = "jq";
 
+    public final String PAGE_QUERY_PARAM = "page";
+    public final String PAGE_SIZE_QUERY_PARAM = "pageSize";
+    public final int DEFAULT_PAGE = 1;
+    public final int DEFAULT_PAGE_SIZE = 10;
+
     private final CollectionController collectionController;
     private final DocumentController documentController;
 
@@ -45,7 +50,12 @@ public class DocumentHandler {
         var collection = ctx.pathParam(COLLECTION_PATH_PARAM);
         var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
 
-        ctx.json(collectionController.listCollection(tenant, collection));
+        var page = Optional.ofNullable(ctx.queryParam(PAGE_QUERY_PARAM))
+                        .map(Integer::parseInt).orElse(DEFAULT_PAGE);
+        var pageSize = Optional.ofNullable(ctx.queryParam(PAGE_SIZE_QUERY_PARAM))
+                .map(Integer::parseInt).orElse(DEFAULT_PAGE_SIZE);
+
+        ctx.json(collectionController.listCollection(tenant, collection ,page, pageSize));
     }
 
     public void create(@NotNull Context ctx) {
