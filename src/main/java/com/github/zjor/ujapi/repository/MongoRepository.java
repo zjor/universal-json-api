@@ -2,6 +2,7 @@ package com.github.zjor.ujapi.repository;
 
 import com.mongodb.Function;
 import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -35,13 +36,24 @@ public class MongoRepository {
                 .collect(Collectors.toList());
     }
 
-    public Paged<Document> listCollection(String collectionName, int page, int size) {
+    private long countDocuments(String collectionName, Optional<Document> filter) {
+        return filter.map(f -> getDb().getCollection(collectionName).countDocuments(f))
+                .orElseGet(() -> getDb().getCollection(collectionName).countDocuments());
+    }
+
+    private FindIterable<Document> find(String collectionName, Optional<Document> filter) {
+        return filter
+                .map(f -> getDb().getCollection(collectionName).find(f))
+                .orElseGet(() -> getDb().getCollection(collectionName).find());
+    }
+
+    public Paged<Document> listCollection(String collectionName, int page, int size, Optional<Document> filter) {
         Paged.PageInfo pagination = Paged.PageInfo.create(
                 page,
                 size,
-                getDb().getCollection(collectionName).countDocuments());
+                countDocuments(collectionName, filter));
 
-        var items = getDb().getCollection(collectionName).find()
+        var items = find(collectionName, filter)
                 .skip(pagination.getOffset())
                 .limit(size);
 
@@ -51,8 +63,8 @@ public class MongoRepository {
                 .build();
     }
 
-    public List<Document> listCollection(String collectionName) {
-        return StreamSupport.stream(getDb().getCollection(collectionName).find().spliterator(), false)
+    public List<Document> listCollection(String collectionName, Optional<Document> filter) {
+        return StreamSupport.stream(getDb().getCollection(collectionName).find(filter.orElse(null)).spliterator(), false)
                 .collect(Collectors.toList());
     }
 

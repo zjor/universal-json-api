@@ -8,6 +8,9 @@ import com.github.zjor.ujapi.util.DocumentUtils;
 import io.javalin.http.Context;
 import io.javalin.http.HttpCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -51,11 +54,16 @@ public class DocumentHandler {
         var tenant = (String) ctx.attribute(TenantHeaderBeforeHandler.TENANT_ATTRIBUTE);
 
         var page = Optional.ofNullable(ctx.queryParam(PAGE_QUERY_PARAM))
-                        .map(Integer::parseInt).orElse(DEFAULT_PAGE);
+                .map(Integer::parseInt).orElse(DEFAULT_PAGE);
         var pageSize = Optional.ofNullable(ctx.queryParam(PAGE_SIZE_QUERY_PARAM))
                 .map(Integer::parseInt).orElse(DEFAULT_PAGE_SIZE);
 
-        ctx.json(collectionController.listCollection(tenant, collection ,page, pageSize));
+        var collectionQuery = Optional.ofNullable(ctx.queryParam("q"))
+                .filter(str -> StringUtils.isNotEmpty(str))
+                .map(str -> new String(Base64.decodeBase64(str)))
+                .map(str -> Document.parse(str)).orElse(null);
+
+        ctx.json(collectionController.listCollection(tenant, collection, page, pageSize, collectionQuery));
     }
 
     public void create(@NotNull Context ctx) {

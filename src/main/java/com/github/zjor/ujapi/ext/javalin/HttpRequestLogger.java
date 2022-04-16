@@ -9,6 +9,13 @@ import org.jetbrains.annotations.NotNull;
 public class HttpRequestLogger implements RequestLogger {
     @Override
     public void handle(@NotNull Context ctx, @NotNull Float executionTimeMs) throws Exception {
-        log.info("{} {}", ctx.method(), ctx.path());
+        StringBuilder logMessage = new StringBuilder(ctx.method())
+                .append(' ')
+                .append(ctx.path());
+        if (ctx.queryString() != null) {
+            logMessage.append('?').append(ctx.queryString());
+        }
+
+        log.info("{}", logMessage);
     }
 }
